@@ -1,0 +1,1 @@
+integrate the scraping for the robotics faculty labs to get a first "demo" of this app
