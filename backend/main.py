@@ -6,9 +6,9 @@ from pydantic import BaseModel
 from typing import List, Dict, Any
 import os
 
-from .services.vector_service import VectorService
-from .services.pinecone_service import PineconeService
-from .models.lab_models import LabMatch, UserQuery
+from backend.services.vector_service import VectorService
+from backend.services.pinecone_service import PineconeService
+from backend.models.lab_models import LabMatch, UserQuery
 
 app = FastAPI(title="College Lab Match API", version="1.0.0")
 

@@ -4,7 +4,7 @@ import logging
 from typing import List, Dict, Any, Optional
 import numpy as np
 
-from ..models.lab_models import LabMatch, LabInfo, PineconeMatch
+from backend.models.lab_models import LabMatch, LabInfo, PineconeMatch
 
 logger = logging.getLogger(__name__)
 

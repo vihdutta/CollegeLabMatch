@@ -1,23 +1,52 @@
+# Git and version control
 .git
 .gitignore
+
+# Python cache and virtual environments
 .venv
+venv/
 __pycache__
 *.pyc
 *.pyo
 *.pyd
 .Python
 *.so
+
+# Testing and development
 .pytest_cache
 .coverage
 .mypy_cache
+.tox
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Development files
+README.md
+requirements.txt
+sample_labs.py
+run_server.py
+
+# Docker files (avoid recursion)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# GitHub workflows
+.github/
+
 node_modules
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
-.DS_Store
-Thumbs.db
-*.log
-README.md
-.env
-docker-compose.yml
-Dockerfile 
+yarn-error.log* 
