@@ -1,42 +1,43 @@
-# Git and version control
-.git
-.gitignore
-
-# Python cache and virtual environments
-.venv
-venv/
-__pycache__
+# Python
+__pycache__/
+*.py[cod]
 *.pyc
 *.pyo
-*.pyd
-.Python
-*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Development scripts (keep requirements.txt!)
+sample_labs.py
+run_server.py
 
 # Testing and development
 .pytest_cache
 .coverage
 .mypy_cache
 .tox
-
-# IDE and editors
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Development files
-README.md
-requirements.txt
-sample_labs.py
-run_server.py
 
 # Docker files (avoid recursion)
 Dockerfile
