@@ -57,13 +57,14 @@ jobs:
               sudo chmod +x /usr/libexec/docker/cli-plugins/docker-compose
             fi
 
+            # Create labmatcher directory if it doesn't exist
+            mkdir -p /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher
+
             # Create .env file for LabMatcher
             cat > /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher/.env << EOF
             PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
+            API_PORT=8001
             EOF
-
-            # Create labmatcher directory if it doesn't exist
-            mkdir -p /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher
 
             # Create docker-compose.yml file for LabMatcher
             cat > /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher/docker-compose.yml << EOF
@@ -73,7 +74,7 @@ jobs:
               labmatcher-app:
                 image: ${{ vars.DOCKERHUB_USERNAME }}/labmatcher-app:latest
                 ports:
-                  - "127.0.0.1:8090:8000"
+                  - "127.0.0.1:8001:8000"
                 environment:
                   - PINECONE_API_KEY=\${PINECONE_API_KEY}
                 env_file:
