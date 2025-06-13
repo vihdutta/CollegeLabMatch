@@ -4,7 +4,7 @@ services:
   labmatcher-app:
     build: .
     ports:
-      - "127.0.0.1:8090:8000"
+      - "127.0.0.1:8080:8001"
     environment:
       - PINECONE_API_KEY=${PINECONE_API_KEY}
     env_file:
