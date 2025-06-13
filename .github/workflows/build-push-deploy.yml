@@ -1,0 +1,125 @@
+name: Build, Push, Deploy LabMatcher
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+
+      - name: Build & Push LabMatcher App Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/labmatcher-app:latest
+
+  deploy:
+    name: Deploy to AWS Lightsail
+    runs-on: ubuntu-latest
+    environment: production
+    needs: build-and-push
+
+    steps:
+      - name: Deploy via SSH to Lightsail
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ vars.LIGHTSAIL_PUBLIC_IP }}
+          username: ${{ vars.LIGHTSAIL_USERNAME }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          port: 22
+          script: |
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            DOMAIN_NAME="${{ vars.DOMAIN_NAME }}"
+
+            # Install Docker Compose v2 if not already installed
+            if ! docker compose version &>/dev/null; then
+              echo "Installing Docker Compose v2..."
+              sudo mkdir -p /usr/libexec/docker/cli-plugins
+              sudo curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+                -o /usr/libexec/docker/cli-plugins/docker-compose
+              sudo chmod +x /usr/libexec/docker/cli-plugins/docker-compose
+            fi
+
+            # Create .env file for LabMatcher
+            cat > /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher/.env << EOF
+            PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
+            EOF
+
+            # Create labmatcher directory if it doesn't exist
+            mkdir -p /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher
+
+            # Create docker-compose.yml file for LabMatcher
+            cat > /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher/docker-compose.yml << EOF
+            version: '3.8'
+
+            services:
+              labmatcher-app:
+                image: ${{ vars.DOCKERHUB_USERNAME }}/labmatcher-app:latest
+                ports:
+                  - "127.0.0.1:8090:8000"
+                environment:
+                  - PINECONE_API_KEY=\${PINECONE_API_KEY}
+                env_file:
+                  - .env
+                networks:
+                  - labmatcher-network
+                restart: unless-stopped
+
+            networks:
+              labmatcher-network:
+                driver: bridge
+            EOF
+
+            # Write reverse-proxy config for LabMatcher
+            sudo tee /etc/nginx/conf.d/${DOMAIN_NAME}.conf > /dev/null << EOF
+            server {
+                listen       80;
+                server_name  ${DOMAIN_NAME} www.${DOMAIN_NAME};
+
+                location = /healthz {
+                  return 200 'OK';
+                  add_header Content-Type "text/plain";
+                }
+
+                location / {
+                    proxy_pass         http://127.0.0.1:8090;
+                    proxy_http_version 1.1;
+                    proxy_set_header   Upgrade \$http_upgrade;
+                    proxy_set_header   Connection 'upgrade';
+                    proxy_set_header   Host \$host;
+                    proxy_set_header   X-Real-IP \$remote_addr;
+                    proxy_set_header   X-Forwarded-For \$proxy_add_x_forwarded_for;
+                    proxy_cache_bypass \$http_upgrade;
+                }
+            }
+            EOF
+
+            # Stop and remove existing containers (Docker Compose v2 style)
+            cd /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher
+            sudo docker compose down || true
+            sudo docker rmi ${{ vars.DOCKERHUB_USERNAME }}/labmatcher-app:latest || true
+
+            # Reload NGINX
+            sudo nginx -t
+            sudo systemctl reload nginx
+
+            # Pull and start LabMatcher
+            sudo docker pull ${{ vars.DOCKERHUB_USERNAME }}/labmatcher-app:latest
+            sudo docker compose up -d 

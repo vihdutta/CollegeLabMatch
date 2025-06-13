@@ -1,140 +1,98 @@
-# College Research Match
+# 🔬 College Lab Match
 
-A lightweight, production-ready full-stack application that helps college students match their resume or research interests to labs at their university using semantic search.
+**Find research labs that match your interests using AI-powered search**
 
-## Features
+A web application that helps students discover research opportunities by matching their interests with lab descriptions using semantic search technology.
 
-- **Semantic Matching**: Uses sentence-transformers/all-MiniLM-L6-v2 for intelligent text similarity
-- **File Support**: Upload PDF, DOCX, or plain text resumes
-- **Real-time Progress**: Live progress bar during matching process
-- **Beautiful UI**: Monochrome design with serif/sans-serif typography
-- **Fast & Lightweight**: Minimal dependencies, clean architecture
+## What is this?
 
-## Tech Stack
+College Lab Match uses AI to understand what you're interested in and finds research labs that align with your goals. Instead of manually browsing hundreds of lab websites, just describe your research interests and get personalized matches with similarity scores.
 
-- **Frontend**: React + TypeScript + TailwindCSS + Vite
-- **Backend**: FastAPI + Python 3.11+
-- **Database**: PostgreSQL with pgvector extension
-- **ML**: Sentence Transformers (all-MiniLM-L6-v2)
-- **Deployment**: Docker Compose
+**Example**: Search for "machine learning computer vision" and get labs like Stanford AI Lab (85% match), MIT CSAIL (78% match), etc.
 
-## Quick Start
+## 🚀 Try it out
 
-### 1. Start the Database
+1. **Local Development**:
+   ```bash
+   git clone <repository-url>
+   cd collegelabmatch.com
+   pip install -r requirements.txt
+   python run_server.py
+   ```
+   Open http://localhost:8000
+
+2. **Using Docker**:
+   ```bash
+   docker compose up
+   ```
+   Open http://localhost:8090
+
+## 🔧 Setup
+
+### Required Environment Variables
+
+Create a `.env` file:
+```env
+PINECONE_API_KEY=your_api_key_here
+```
+
+### Get a Pinecone API Key
+1. Sign up at [pinecone.io](https://pinecone.io)
+2. Create a new project
+3. Create an index named `collegelabmatch` with dimension `384` and cosine similarity
+4. Copy your API key
+
+### Add Lab Data
 ```bash
-docker-compose up -d postgres
+python sample_labs.py  # Populates database with sample labs
 ```
 
-### 2. Install Backend Dependencies
-```bash
-pip install -r requirements.txt
-```
+## 🎯 How to Use
 
-### 3. Start the Backend
-```bash
-uvicorn backend.main:app --reload
-```
+1. **Enter your interests**: "deep learning", "cancer research", "robotics", etc.
+2. **Choose number of results**: 5, 10, or 20 labs
+3. **Get matched labs** with similarity scores and contact info
+4. **Browse results** and reach out to labs that interest you
 
-### 4. Install Frontend Dependencies
-```bash
-cd frontend
-npm install
-```
+## 🏗️ For Developers
 
-### 5. Start the Frontend
-```bash
-npm run dev
-```
+**Tech Stack**: Python FastAPI + Vanilla JavaScript + Pinecone Vector DB + HuggingFace Transformers
 
-The app will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
+**Key Files**:
+- `backend/main.py` - FastAPI server
+- `frontend/index.html` - Web interface
+- `backend/services/` - AI and database logic
 
-## Project Structure
+**API Endpoints**:
+- `POST /api/search-labs` - Search for matching labs
+- `GET /api/health` - Health check
 
-```
-collegeresearchmatch/
-├── backend/
-│   ├── main.py          # FastAPI app
-│   ├── match.py         # Embedding & matching logic
-│   ├── parse.py         # File parsing (PDF/DOCX)
-│   └── db.py           # Database models & connection
-├── frontend/
-│   ├── src/
-│   │   ├── App.tsx              # Main application
-│   │   ├── api.ts               # Backend API calls
-│   │   └── components/
-│   │       ├── UploadForm.tsx   # File/text input
-│   │       ├── ProgressBar.tsx  # Real-time progress
-│   │       └── ResultList.tsx   # Lab results display
-│   ├── package.json
-│   └── tailwind.config.js
-├── docker-compose.yml
-├── requirements.txt
-└── README.md
-```
+## 🚢 Deployment
 
-## Database Schema
+The project includes automated deployment to AWS Lightsail via GitHub Actions.
 
-The `labs` table stores research lab information:
+**Required GitHub Secrets**:
+- `DOCKERHUB_ACCESS_TOKEN`
+- `LIGHTSAIL_SSH_KEY` 
+- `PINECONE_API_KEY`
 
-```sql
-CREATE TABLE labs (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    university TEXT NOT NULL,
-    pi TEXT NOT NULL,
-    email TEXT NOT NULL,
-    summary TEXT NOT NULL,
-    embedding VECTOR(384),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
-```
+**Required GitHub Variables**:
+- `DOCKERHUB_USERNAME`
+- `LIGHTSAIL_PUBLIC_IP`
+- `LIGHTSAIL_USERNAME`
+- `DOMAIN_NAME`
 
-## API Endpoints
+Push to `main` branch to trigger automatic deployment.
 
-- `GET /universities` - List available universities
-- `POST /match` - Match text input to labs
-- `POST /match/file` - Match uploaded file to labs
-- `GET /progress` - Get real-time matching progress
+## 🤔 How it Works
 
-## Adding Lab Data
+1. **Text Processing**: Your interests are converted to vectors using HuggingFace transformers
+2. **Similarity Search**: Pinecone finds labs with similar vector representations  
+3. **Ranking**: Results are ranked by similarity score (0-100%)
+4. **Display**: Get lab details, professor info, and contact information
 
-To populate the database with lab data, you can use the database connection in `backend/db.py` to insert records with embeddings:
+## 📞 Support
 
-```python
-from backend.db import SessionLocal, Lab
-from backend.match import create_embedding
-
-db = SessionLocal()
-
-# Example lab data
-lab = Lab(
-    name="AI Research Lab",
-    university="Stanford University",
-    pi="Dr. Jane Smith",
-    email="jsmith@stanford.edu",
-    summary="We focus on machine learning and natural language processing...",
-    embedding=create_embedding("machine learning natural language processing AI")
-)
-
-db.add(lab)
-db.commit()
-```
-
-## Development
-
-The application follows clean architecture principles:
-- Modular components with single responsibilities
-- Type-safe interfaces between frontend and backend
-- Efficient vector similarity search using pgvector
-- Real-time progress updates via polling
-
-## Production Deployment
-
-For production:
-1. Set proper environment variables for database connection
-2. Use a production WSGI server like Gunicorn for the backend
-3. Build the frontend with `npm run build`
-4. Serve static files with nginx or similar
-5. Use a managed PostgreSQL instance with pgvector support 
+- Check that your `.env` file has the correct Pinecone API key
+- Run `python sample_labs.py` if you get no search results
+- Open an issue if you encounter bugs 

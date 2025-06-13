@@ -1,68 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Primary Meta Tags -->
-    <title>College Research Match - Find Perfect Research Labs at Your University</title>
-    <meta name="title" content="College Research Match - Find Perfect Research Labs at Your University" />
-    <meta name="description" content="AI-powered semantic search to match your research interests with university labs. Upload your resume or enter keywords to discover research opportunities." />
-    <meta name="keywords" content="research labs, university research, AI matching, academic research, college labs, research opportunities, semantic search" />
-    <meta name="author" content="College Research Match" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://collegelabmatch.com" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://collegelabmatch.com/" />
-    <meta property="og:title" content="College Research Match - Find Perfect Research Labs" />
-    <meta property="og:description" content="AI-powered semantic search to match your research interests with university labs. Upload your resume or enter keywords to discover research opportunities." />
-    <meta property="og:image" content="https://collegelabmatch.com/og-image.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:site_name" content="College Research Match" />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://collegelabmatch.com/" />
-    <meta property="twitter:title" content="College Research Match - Find Perfect Research Labs" />
-    <meta property="twitter:description" content="AI-powered semantic search to match your research interests with university labs. Upload your resume or enter keywords to discover research opportunities." />
-    <meta property="twitter:image" content="https://collegelabmatch.com/twitter-image.jpg" />
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    
-    <!-- Performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "College Research Match",
-      "description": "AI-powered semantic search to match your research interests with university labs",
-      "url": "https://collegelabmatch.com",
-      "applicationCategory": "EducationalApplication",
-      "operatingSystem": "Any",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "creator": {
-        "@type": "Organization",
-        "name": "College Research Match"
-      }
-    }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Lab Match</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            600: '#667eea',
+                            700: '#5a6fd8'
+                        }
+                    }
+                }
+            }
+        }
     </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-600">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-10 text-white">
+            <h1 class="text-5xl font-bold mb-4">🔬 College Lab Match</h1>
+            <p class="text-xl opacity-90">Find research labs that match your interests</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="bg-white rounded-2xl shadow-2xl p-8 md:p-12 mb-8">
+            <!-- Search Section -->
+            <div class="mb-10">
+                <form id="searchForm" class="space-y-6">
+                    <div>
+                        <label for="keywords" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Describe your research interests:
+                        </label>
+                        <textarea 
+                            id="keywords" 
+                            name="keywords" 
+                            placeholder="e.g., machine learning, artificial intelligence, computer vision, neural networks, deep learning, natural language processing..."
+                            rows="4"
+                            required
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary-600 focus:ring-2 focus:ring-primary-600 focus:ring-opacity-20 transition-colors resize-none text-gray-700 placeholder-gray-400"
+                        ></textarea>
+                    </div>
+
+                    <div>
+                        <label for="maxResults" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Number of results:
+                        </label>
+                        <select id="maxResults" name="maxResults" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary-600 focus:ring-2 focus:ring-primary-600 focus:ring-opacity-20 transition-colors text-gray-700">
+                            <option value="5">5 results</option>
+                            <option value="10" selected>10 results</option>
+                            <option value="20">20 results</option>
+                        </select>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        id="searchBtn"
+                        class="w-full bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold py-4 px-6 rounded-lg hover:from-primary-700 hover:to-purple-700 transform hover:-translate-y-1 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                    >
+                        <span id="searchText">Find Matching Labs</span>
+                        <span id="loadingText" class="hidden">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Searching...
+                        </span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Matching Labs</h2>
+                <div id="results" class="space-y-6"></div>
+            </div>
+
+            <!-- Error Section -->
+            <div id="errorSection" class="hidden text-center py-12">
+                <div class="max-w-md mx-auto">
+                    <div class="text-red-500 mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-red-600 mb-2">Error</h2>
+                    <p id="errorMessage" class="text-gray-600"></p>
+                </div>
+            </div>
+
+            <!-- No Results Section -->
+            <div id="noResultsSection" class="hidden text-center py-12">
+                <div class="max-w-md mx-auto">
+                    <div class="text-gray-400 mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-600 mb-2">No Results Found</h2>
+                    <p class="text-gray-500">Try using different keywords or check your spelling.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center text-white opacity-80">
+            <p>Powered by AI-driven semantic search</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
 </html> 

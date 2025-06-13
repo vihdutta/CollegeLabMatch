@@ -1,140 +1,85 @@
-from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from typing import Optional, List
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-import time
-import asyncio
+from typing import List, Dict, Any
+import os
 
-from .db import get_db, init_db
-from .parse import extract_text_from_file, clean_text
-from .match import create_embedding, find_matching_labs, get_available_universities
+from .services.vector_service import VectorService
+from .services.pinecone_service import PineconeService
+from .models.lab_models import LabMatch, UserQuery
 
-app = FastAPI(title="College Research Match API")
+app = FastAPI(title="College Lab Match API", version="1.0.0")
 
-# cors for frontend
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=["*"],  # In production, specify your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class MatchRequest(BaseModel):
-    text: str
-    university: str
+# Initialize services
+vector_service = VectorService()
+pinecone_service = PineconeService()
 
-class MatchResponse(BaseModel):
-    labs: List[dict]
-    processing_time: float
+# Mount static files for frontend
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
-# global variable to track matching progress
-matching_progress = {"status": "idle", "progress": 0}
-
-@app.on_event("startup")
-async def startup_event():
-    init_db()
-
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    return {"message": "College Research Match API"}
+    with open("frontend/index.html", "r") as f:
+        return HTMLResponse(content=f.read())
 
-@app.get("/universities")
-async def get_universities(db: Session = Depends(get_db)):
-    """get list of available universities"""
+@app.post("/api/search-labs", response_model=List[LabMatch])
+async def search_labs(query: UserQuery):
     try:
-        universities = get_available_universities(db)
-        return {"universities": universities}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/match", response_model=MatchResponse)
-async def match_labs(
-    request: MatchRequest,
-    db: Session = Depends(get_db)
-):
-    """match user input to research labs"""
-    start_time = time.time()
+        # Vectorize user query
+        query_vector = vector_service.vectorize_text(query.keywords)
+        
+        # Search similar labs in Pinecone
+        matches = pinecone_service.search_similar_labs(
+            query_vector=query_vector,
+            top_k=query.max_results
+        )
+        
+        return matches
     
-    try:
-        # update progress
-        global matching_progress
-        matching_progress = {"status": "processing", "progress": 10}
-        
-        # clean input text
-        cleaned_text = clean_text(request.text)
-        if not cleaned_text.strip():
-            raise HTTPException(status_code=400, detail="no valid text provided")
-        
-        matching_progress["progress"] = 30
-        await asyncio.sleep(0.1)  # allow progress update
-        
-        # create embedding
-        embedding = create_embedding(cleaned_text)
-        matching_progress["progress"] = 60
-        await asyncio.sleep(0.1)
-        
-        # find matching labs
-        labs = find_matching_labs(embedding, request.university, db)
-        matching_progress["progress"] = 90
-        await asyncio.sleep(0.1)
-        
-        processing_time = time.time() - start_time
-        matching_progress = {"status": "complete", "progress": 100}
-        
-        return MatchResponse(labs=labs, processing_time=processing_time)
-        
     except Exception as e:
-        matching_progress = {"status": "error", "progress": 0}
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
-@app.post("/match/file")
-async def match_from_file(
-    file: UploadFile = File(...),
-    university: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    """match uploaded file content to research labs"""
-    start_time = time.time()
+@app.post("/api/add-lab")
+async def add_lab(lab_data: Dict[str, Any]):
+    """
+    Add a new lab to the vector database (admin endpoint)
+    """
+    try:
+        # Vectorize lab description
+        description = f"{lab_data.get('name', '')} {lab_data.get('description', '')} {lab_data.get('research_areas', '')}"
+        lab_vector = vector_service.vectorize_text(description)
+        
+        # Store in Pinecone
+        success = pinecone_service.upsert_lab(
+            lab_id=lab_data.get('id'),
+            vector=lab_vector,
+            metadata=lab_data
+        )
+        
+        if success:
+            return {"message": "Lab added successfully"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to add lab")
     
-    try:
-        global matching_progress
-        matching_progress = {"status": "processing", "progress": 5}
-        
-        # read and parse file
-        file_content = await file.read()
-        matching_progress["progress"] = 20
-        
-        extracted_text = extract_text_from_file(file_content, file.filename)
-        cleaned_text = clean_text(extracted_text)
-        
-        if not cleaned_text.strip():
-            raise HTTPException(status_code=400, detail="no valid text extracted from file")
-        
-        matching_progress["progress"] = 40
-        await asyncio.sleep(0.1)
-        
-        # create embedding
-        embedding = create_embedding(cleaned_text)
-        matching_progress["progress"] = 70
-        await asyncio.sleep(0.1)
-        
-        # find matching labs
-        labs = find_matching_labs(embedding, university, db)
-        matching_progress["progress"] = 90
-        await asyncio.sleep(0.1)
-        
-        processing_time = time.time() - start_time
-        matching_progress = {"status": "complete", "progress": 100}
-        
-        return MatchResponse(labs=labs, processing_time=processing_time)
-        
     except Exception as e:
-        matching_progress = {"status": "error", "progress": 0}
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to add lab: {str(e)}")
 
-@app.get("/progress")
-async def get_progress():
-    """get current matching progress for real-time updates"""
-    return matching_progress 
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000) 
