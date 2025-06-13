@@ -1,0 +1,41 @@
+name: Test SSH Connection
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+jobs:
+  test-ssh:
+    name: Test SSH Connection to Lightsail
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Test SSH Connection
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ vars.LIGHTSAIL_PUBLIC_IP }}
+          username: ${{ vars.LIGHTSAIL_USERNAME }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          port: 22
+          script: |
+            echo "🚀 SSH Connection successful!"
+            echo "Server info:"
+            uname -a
+            echo ""
+            echo "Current user: $(whoami)"
+            echo "Current directory: $(pwd)"
+            echo "Home directory: $HOME"
+            echo ""
+            echo "Docker status:"
+            docker --version || echo "Docker not installed"
+            echo ""
+            echo "Docker Compose status:"
+            docker compose version || echo "Docker Compose not installed"
+            echo ""
+            echo "Available disk space:"
+            df -h /
+            echo ""
+            echo "Available memory:"
+            free -h
+            echo ""
+            echo "✅ SSH test completed successfully!" 
