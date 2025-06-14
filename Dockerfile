@@ -1,13 +1,15 @@
-# Use Python 3.11 slim image as base
-FROM python:3.11-slim
+# Use Python 3.11 Alpine image as base
+FROM python:3.11-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Install system dependencies for Alpine
+RUN apk add --no-cache \
+    build-base \
+    gcc \
+    musl-dev \
+    postgresql-dev
 
 # Copy requirements first for better caching
 COPY requirements.txt .
@@ -21,5 +23,6 @@ COPY . .
 # Expose port 8001
 EXPOSE 8001
 
-# Command to run the application
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8001"] 
+# Change working directory to backend and run main.py directly
+WORKDIR /app/backend
+CMD ["python", "main.py"] 

@@ -34,13 +34,22 @@ College Lab Match uses AI to understand what you're interested in and finds rese
 Create a `.env` file:
 ```env
 PINECONE_API_KEY=your_api_key_here
+HUGGINGFACE_API_KEY=your_hf_token_here
 ```
 
-### Get a Pinecone API Key
+### Get API Keys
+
+**Pinecone API Key**:
 1. Sign up at [pinecone.io](https://pinecone.io)
 2. Create a new project
 3. Create an index named `collegelabmatch` with dimension `384` and cosine similarity
 4. Copy your API key
+
+**Hugging Face API Token**:
+1. Sign up at [huggingface.co](https://huggingface.co)
+2. Go to Settings > Access Tokens
+3. Create a new token with "Read" permissions
+4. Copy your token
 
 ### Add Lab Data
 ```bash
@@ -56,7 +65,7 @@ python sample_labs.py  # Populates database with sample labs
 
 ## 🏗️ For Developers
 
-**Tech Stack**: Python FastAPI + Vanilla JavaScript + Pinecone Vector DB + HuggingFace Transformers
+**Tech Stack**: Python FastAPI + Vanilla JavaScript + Pinecone Vector DB + HuggingFace Inference API
 
 **Key Files**:
 - `backend/main.py` - FastAPI server
@@ -86,7 +95,7 @@ Push to `main` branch to trigger automatic deployment.
 
 ## 🤔 How it Works
 
-1. **Text Processing**: Your interests are converted to vectors using HuggingFace transformers
+1. **Text Processing**: Your interests are converted to vectors using HuggingFace Inference API
 2. **Similarity Search**: Pinecone finds labs with similar vector representations  
 3. **Ranking**: Results are ranked by similarity score (0-100%)
 4. **Display**: Get lab details, professor info, and contact information

@@ -32,6 +32,7 @@ Thumbs.db
 # Development scripts (keep requirements.txt!)
 sample_labs.py
 run_server.py
+test_api_migration.py
 
 # Testing and development
 .pytest_cache
