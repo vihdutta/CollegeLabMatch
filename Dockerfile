@@ -1,15 +1,15 @@
-# Use Python 3.10 Alpine image as base
-FROM python:3.10-alpine
+# Use Python 3.10 slim image as base (Debian-based)
+FROM python:3.10-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for Alpine
-RUN apk add --no-cache \
-    build-base \
+# Install system dependencies for Debian
+RUN apt-get update && apt-get install -y \
+    build-essential \
     gcc \
-    musl-dev \
-    postgresql-dev
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
 COPY requirements.txt .
