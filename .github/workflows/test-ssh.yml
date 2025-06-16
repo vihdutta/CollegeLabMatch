@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           port: 22
           script: |
-            echo "🚀 SSH Connection successful!"
+            echo "SSH Connection successful!"
             echo "Server info:"
             uname -a
             echo ""
@@ -38,4 +38,4 @@ jobs:
             echo "Available memory:"
             free -h
             echo ""
-            echo "✅ SSH test completed successfully!" 
+            echo "SSH test completed successfully!" 

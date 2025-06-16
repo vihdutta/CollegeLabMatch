@@ -89,7 +89,24 @@ class PineconeService:
             matches = []
             for match in search_results.matches:
                 try:
-                    lab_info = LabInfo(**match.metadata)
+                    # Parse research_areas from string to list if needed
+                    research_areas = match.metadata.get('research_areas', '')
+                    if isinstance(research_areas, str):
+                        research_areas = [area.strip() for area in research_areas.split(',') if area.strip()]
+                    elif not isinstance(research_areas, list):
+                        research_areas = []
+                    
+                    # Create lab info with cleaned metadata
+                    lab_info = LabInfo(
+                        id=match.metadata.get('id', ''),
+                        name=match.metadata.get('name', ''),
+                        professor=match.metadata.get('professor', ''),
+                        description=match.metadata.get('description', ''),
+                        research_areas=research_areas,
+                        website=match.metadata.get('website', ''),
+                        email=match.metadata.get('email', '')
+                    )
+                    
                     lab_match = LabMatch(
                         lab=lab_info,
                         similarity_score=float(match.score)

@@ -1,4 +1,4 @@
-# 🔬 College Lab Match
+# College Lab Match
 
 **Find research labs that match your interests using AI-powered search**
 
@@ -10,7 +10,7 @@ College Lab Match uses AI to understand what you're interested in and finds rese
 
 **Example**: Search for "machine learning computer vision" and get labs like Stanford AI Lab (85% match), MIT CSAIL (78% match), etc.
 
-## 🚀 Try it out
+## Try it out
 
 1. **Local Development**:
    ```bash
@@ -27,7 +27,7 @@ College Lab Match uses AI to understand what you're interested in and finds rese
    ```
    Open http://localhost:8090
 
-## 🔧 Setup
+## Setup
 
 ### Required Environment Variables
 
@@ -56,14 +56,14 @@ HUGGINGFACE_API_KEY=your_hf_token_here
 python sample_labs.py  # Populates database with sample labs
 ```
 
-## 🎯 How to Use
+## How to Use
 
 1. **Enter your interests**: "deep learning", "cancer research", "robotics", etc.
 2. **Choose number of results**: 5, 10, or 20 labs
 3. **Get matched labs** with similarity scores and contact info
 4. **Browse results** and reach out to labs that interest you
 
-## 🏗️ For Developers
+## For Developers
 
 **Tech Stack**: Python FastAPI + Vanilla JavaScript + Pinecone Vector DB + HuggingFace Inference API
 
@@ -76,7 +76,7 @@ python sample_labs.py  # Populates database with sample labs
 - `POST /api/search-labs` - Search for matching labs
 - `GET /api/health` - Health check
 
-## 🚢 Deployment
+## Deployment
 
 The project includes automated deployment to AWS Lightsail via GitHub Actions.
 
@@ -93,14 +93,14 @@ The project includes automated deployment to AWS Lightsail via GitHub Actions.
 
 Push to `main` branch to trigger automatic deployment.
 
-## 🤔 How it Works
+## How it Works
 
 1. **Text Processing**: Your interests are converted to vectors using HuggingFace Inference API
 2. **Similarity Search**: Pinecone finds labs with similar vector representations  
 3. **Ranking**: Results are ranked by similarity score (0-100%)
 4. **Display**: Get lab details, professor info, and contact information
 
-## 📞 Support
+## Support
 
 - Check that your `.env` file has the correct Pinecone API key
 - Run `python sample_labs.py` if you get no search results

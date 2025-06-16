@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>College Lab Match</title>
+    <title>UM Robotics Research Lab Match</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/heroicons@2.0.18/24/outline/index.js" type="module"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: {
-                            600: '#667eea',
-                            700: '#5a6fd8'
+                        umich: {
+                            blue: '#00274C',
+                            maize: '#FFCB05',
+                            'blue-light': '#2B5797',
+                            'maize-dark': '#D4A116',
+                            'blue-darker': '#001A35'
                         }
                     }
                 }
@@ -20,38 +24,90 @@
         }
     </script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-purple-600">
+<body class="min-h-screen bg-white">
+    <!-- Creative header with Michigan blue accent -->
+    <div class="bg-gradient-to-r from-umich-blue to-umich-blue-light py-1"></div>
+    
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- Header -->
-        <header class="text-center mb-10 text-white">
-            <h1 class="text-5xl font-bold mb-4">🔬 College Lab Match</h1>
-            <p class="text-xl opacity-90">Find research labs that match your interests</p>
+        <header class="text-center mb-10 relative">
+            <!-- Decorative Michigan blue elements -->
+            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 w-32 h-1 bg-umich-maize rounded-full"></div>
+            <h1 class="text-5xl font-bold mb-4 text-umich-blue">Robotics Research Lab Match</h1>
+            <p class="text-xl text-gray-600">Connect with cutting-edge robotics research opportunities at Michigan</p>
+            <!-- Subtle decorative line -->
+            <div class="mt-6 w-24 h-0.5 bg-umich-blue mx-auto"></div>
         </header>
 
         <!-- Main Content -->
-        <main class="bg-white rounded-2xl shadow-2xl p-8 md:p-12 mb-8">
+        <main class="bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-8 border border-gray-100 relative overflow-hidden">
+            <!-- Subtle background pattern -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-umich-blue to-transparent opacity-5 rounded-full -translate-y-16 translate-x-16"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-umich-maize to-transparent opacity-10 rounded-full translate-y-12 -translate-x-12"></div>
+
+            <!-- Search Mode Toggle -->
+            <div class="mb-8 relative z-10">
+                <div class="flex justify-center items-center space-x-4 mb-6">
+                    <button id="resumeModeBtn" class="px-6 py-3 bg-umich-blue text-white rounded-lg font-semibold transition-all duration-200 hover:bg-umich-blue-light shadow-md">
+                        Upload Resume
+                    </button>
+                    <button id="textModeBtn" class="px-6 py-3 bg-gray-50 text-gray-700 rounded-lg font-semibold transition-all duration-200 hover:bg-gray-100 border border-gray-200">
+                        Describe Research Interests
+                    </button>
+                </div>
+            </div>
+
             <!-- Search Section -->
-            <div class="mb-10">
+            <div class="mb-10 relative z-10">
                 <form id="searchForm" class="space-y-6">
-                    <div>
-                        <label for="keywords" class="block text-sm font-semibold text-gray-700 mb-2">
-                            Describe your research interests:
-                        </label>
-                        <textarea 
-                            id="keywords" 
-                            name="keywords" 
-                            placeholder="e.g., machine learning, artificial intelligence, computer vision, neural networks, deep learning, natural language processing..."
-                            rows="4"
-                            required
-                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary-600 focus:ring-2 focus:ring-primary-600 focus:ring-opacity-20 transition-colors resize-none text-gray-700 placeholder-gray-400"
-                        ></textarea>
+                    <!-- Resume Upload Mode -->
+                    <div id="resumeUploadSection" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-umich-blue mb-2">
+                                Upload your resume to find matching robotics labs:
+                            </label>
+                            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-umich-blue transition-colors cursor-pointer bg-gray-50 hover:bg-blue-50">
+                                <div id="dropZoneContent">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <p class="text-lg font-medium text-gray-700 mb-2">Drop your resume here</p>
+                                    <p class="text-sm text-gray-500 mb-4">or click to browse files</p>
+                                    <p class="text-xs text-gray-400">Supports PDF and Word documents</p>
+                                </div>
+                                <div id="fileSelectedContent" class="hidden">
+                                    <svg class="mx-auto h-12 w-12 text-umich-blue mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p id="selectedFileName" class="text-lg font-medium text-umich-blue mb-2"></p>
+                                    <button type="button" id="removeFileBtn" class="text-sm text-red-600 hover:text-red-800 underline">Remove file</button>
+                                </div>
+                            </div>
+                            <input type="file" id="resumeFile" name="resumeFile" accept=".pdf,.docx,.doc" class="hidden">
+                        </div>
+                    </div>
+
+                    <!-- Text Input Mode -->
+                    <div id="textInputSection" class="hidden space-y-6">
+                        <div>
+                            <label for="keywords" class="block text-sm font-bold text-umich-blue mb-2">
+                                Describe your robotics research interests:
+                            </label>
+                            <textarea 
+                                id="keywords" 
+                                name="keywords" 
+                                placeholder="e.g., autonomous systems, computer vision, machine learning, human-robot interaction, control systems, perception, manipulation, mobile robotics, AI for robotics..."
+                                rows="4"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-umich-blue focus:ring-2 focus:ring-umich-blue focus:ring-opacity-20 transition-colors resize-none text-gray-700 placeholder-gray-400 shadow-sm"
+                            ></textarea>
+                        </div>
                     </div>
 
                     <div>
-                        <label for="maxResults" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="maxResults" class="block text-sm font-bold text-umich-blue mb-2">
                             Number of results:
                         </label>
-                        <select id="maxResults" name="maxResults" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary-600 focus:ring-2 focus:ring-primary-600 focus:ring-opacity-20 transition-colors text-gray-700">
+                        <select id="maxResults" name="maxResults" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-umich-blue focus:ring-2 focus:ring-umich-blue focus:ring-opacity-20 transition-colors text-gray-700 shadow-sm">
                             <option value="5">5 results</option>
                             <option value="10" selected>10 results</option>
                             <option value="20">20 results</option>
@@ -61,28 +117,33 @@
                     <button 
                         type="submit" 
                         id="searchBtn"
-                        class="w-full bg-gradient-to-r from-primary-600 to-purple-600 text-white font-semibold py-4 px-6 rounded-lg hover:from-primary-700 hover:to-purple-700 transform hover:-translate-y-1 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+                        class="w-full bg-umich-blue hover:bg-umich-blue-light text-white font-bold py-4 px-6 rounded-lg transform hover:-translate-y-0.5 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none border-2 border-umich-maize"
                     >
-                        <span id="searchText">Find Matching Labs</span>
+                        <span id="searchText">Find Matching Robotics Labs</span>
                         <span id="loadingText" class="hidden">
                             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Searching...
+                            Analyzing and Matching...
                         </span>
                     </button>
                 </form>
             </div>
 
             <!-- Results Section -->
-            <div id="resultsSection" class="hidden">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Matching Labs</h2>
-                <div id="results" class="space-y-6"></div>
+            <div id="resultsSection" class="hidden relative z-10">
+                <div class="border-b-2 border-umich-blue pb-2 mb-6 relative">
+                    <h2 class="text-2xl font-bold text-umich-blue">
+                        Matching UM Robotics Labs
+                    </h2>
+                    <div class="absolute bottom-0 left-0 w-16 h-0.5 bg-umich-maize"></div>
+                </div>
+                <div id="results" class="space-y-6 max-h-screen overflow-y-auto"></div>
             </div>
 
             <!-- Error Section -->
-            <div id="errorSection" class="hidden text-center py-12">
+            <div id="errorSection" class="hidden text-center py-12 relative z-10">
                 <div class="max-w-md mx-auto">
                     <div class="text-red-500 mb-4">
                         <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +156,7 @@
             </div>
 
             <!-- No Results Section -->
-            <div id="noResultsSection" class="hidden text-center py-12">
+            <div id="noResultsSection" class="hidden text-center py-12 relative z-10">
                 <div class="max-w-md mx-auto">
                     <div class="text-gray-400 mb-4">
                         <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,14 +164,41 @@
                         </svg>
                     </div>
                     <h2 class="text-xl font-semibold text-gray-600 mb-2">No Results Found</h2>
-                    <p class="text-gray-500">Try using different keywords or check your spelling.</p>
+                    <p class="text-gray-500">Try using different keywords or check your spelling. Consider broadening your search terms.</p>
                 </div>
             </div>
         </main>
 
         <!-- Footer -->
-        <footer class="text-center text-white opacity-80">
-            <p>Powered by AI-driven semantic search</p>
+        <footer class="text-center py-6 bg-gray-50 rounded-lg border border-gray-100">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="border-t border-gray-200 pt-4">
+                    <!-- Developer Name -->
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3"><a href="https://vihdutta.com" target="_blank" rel="noopener noreferrer" class="hover:text-umich-blue transition-colors">Vihaan Dutta</a></h3>
+                    
+                    <!-- Social Links -->
+                    <div class="flex justify-center space-x-6 mb-4">
+                        <a href="https://github.com/vihdutta" target="_blank" rel="noopener noreferrer" 
+                           class="text-gray-600 hover:text-umich-blue transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">GitHub</span>
+                        </a>
+                        
+                        <a href="https://linkedin.com/in/vihdutta" target="_blank" rel="noopener noreferrer"
+                           class="text-gray-600 hover:text-umich-blue transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                            <span class="sr-only">LinkedIn</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Powered by text -->
+                    <p class="text-sm text-gray-500">Powered by AI-driven semantic search</p>
+                </div>
+            </div>
         </footer>
     </div>
 

@@ -69,6 +69,7 @@ jobs:
             cat > /home/${{ vars.LIGHTSAIL_USERNAME }}/labmatcher/.env << EOF
             PINECONE_API_KEY=${{ secrets.PINECONE_API_KEY }}
             HF_TOKEN=${{ secrets.HF_TOKEN }}
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
             API_PORT=8001
             EOF
 
@@ -84,6 +85,7 @@ jobs:
                 environment:
                   - PINECONE_API_KEY=\${PINECONE_API_KEY}
                   - HF_TOKEN=\${HF_TOKEN}
+                  - GEMINI_API_KEY=\${GEMINI_API_KEY}
                 env_file:
                   - .env
                 networks:

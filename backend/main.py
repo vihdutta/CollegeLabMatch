@@ -1,9 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import os
 from dotenv import load_dotenv
 
@@ -12,9 +12,9 @@ load_dotenv()
 
 from services.vector_service import VectorService
 from services.pinecone_service import PineconeService
-from models.lab_models import LabMatch, UserQuery
+from models.lab_models import LabMatch, UserQuery, UserQueryWithFile
 
-app = FastAPI(title="College Lab Match API", version="1.0.0")
+app = FastAPI(title="UM Robotics Lab Match API", version="1.0.0")
 
 # Configure CORS
 app.add_middleware(
@@ -30,12 +30,15 @@ vector_service = VectorService()
 pinecone_service = PineconeService()
 
 # Mount static files for frontend
-app.mount("/static", StaticFiles(directory="/app/frontend"), name="static")
+import os
+frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    with open("/app/frontend/index.html", "r") as f:
+    frontend_index = os.path.join(frontend_path, "index.html")
+    with open(frontend_index, "r") as f:
         return HTMLResponse(content=f.read())
 
 
@@ -52,6 +55,68 @@ async def search_labs(query: UserQuery):
 
         return matches
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+
+@app.post("/api/search-labs-with-resume", response_model=List[LabMatch])
+async def search_labs_with_resume(
+    max_results: int = Form(10),
+    search_type: str = Form("text"),
+    keywords: Optional[str] = Form(None),
+    resume_file: Optional[UploadFile] = File(None)
+):
+    """
+    Search labs with either text keywords or resume file
+    """
+    try:
+        query_text = ""
+        
+        if search_type == "resume" and resume_file:
+            # Validate file type
+            if not resume_file.filename:
+                raise HTTPException(status_code=400, detail="No file selected")
+            
+            file_extension = resume_file.filename.lower().split('.')[-1]
+            if file_extension not in ['pdf', 'docx', 'doc']:
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Unsupported file type. Please upload PDF or DOCX files."
+                )
+            
+            # Read file content
+            file_content = await resume_file.read()
+            
+            # Extract text from resume
+            resume_text = vector_service.extract_text_from_resume(file_content, resume_file.filename)
+            
+            # Extract research interests from resume
+            query_text = vector_service.extract_research_interests_from_resume(resume_text)
+            
+            if not query_text.strip():
+                raise HTTPException(
+                    status_code=400, 
+                    detail="Could not extract research interests from resume. Please try with text input."
+                )
+        
+        elif search_type == "text" and keywords:
+            query_text = keywords
+        
+        else:
+            raise HTTPException(status_code=400, detail="Please provide either keywords or upload a resume")
+        
+        # Vectorize the query text
+        query_vector = vector_service.vectorize_text(query_text)
+        
+        # Search similar labs in Pinecone
+        matches = pinecone_service.search_similar_labs(
+            query_vector=query_vector, top_k=max_results
+        )
+        
+        return matches
+        
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
