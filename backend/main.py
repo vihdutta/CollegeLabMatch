@@ -31,7 +31,19 @@ pinecone_service = PineconeService()
 
 # Mount static files for frontend
 import os
-frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+# Use absolute path that works in both dev and production
+if os.path.exists("/app/frontend"):
+    # Production Docker path
+    frontend_path = "/app/frontend"
+else:
+    # Local development path
+    frontend_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend")
+
+print(f"Frontend path: {frontend_path}")  # Debug log
+print(f"Frontend exists: {os.path.exists(frontend_path)}")  # Debug log
+if os.path.exists(frontend_path):
+    print(f"Frontend contents: {os.listdir(frontend_path)}")  # Debug log
+
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
 
